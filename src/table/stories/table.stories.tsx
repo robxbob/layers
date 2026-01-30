@@ -16,10 +16,9 @@ const meta = {
 			{ first: 'Robert', last: 'Hernandez' },
 			{ first: 'Mimi', last: 'Hernandez' },
 		];
-		const columnOrder = ['first', 'last'];
 		const Table = useTable({
 			data,
-			tableCtx: { columnOrder },
+			tableCtx: { columnOrder: [] },
 		});
 		return <Table />;
 	},

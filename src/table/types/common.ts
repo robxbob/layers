@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import type { ComponentType } from 'react';
 import type { Ctx, Data } from '@/utils/types/common';
 import type { Table } from '../components/table';
 import type { TableBody } from '../components/table-body';
@@ -17,6 +17,7 @@ export type TableLayerProps<TData extends Data, TTableCtx extends Ctx> = {
 	data: TData[];
 };
 
-export type TableLayer<TData extends Data, TTableCtx extends Ctx> = FC<
-	TableLayerProps<TData, TTableCtx>
->;
+export type TableLayer<
+	TData extends Data,
+	TTableCtx extends Ctx,
+> = ComponentType<TableLayerProps<TData, TTableCtx>>;

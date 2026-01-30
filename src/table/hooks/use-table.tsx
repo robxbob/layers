@@ -12,19 +12,22 @@ type ExtractTableCtx<TTableLayer extends TableLayer<Any, Any>> = [
 	? C
 	: Ctx;
 
+type ContainsRequiredField<T> = Partial<T> extends T ? false : true;
+
 export function useTable<
 	TData extends Data,
 	TTableCtx extends ExtractTableCtx<NoInfer<TTableLayer>> & Ctx,
-	TTableLayer extends TableLayer<TData, Any> = typeof BaseDataLayer,
+	TTableLayer extends TableLayer<TData, Any> = typeof BaseDataLayer<TData>,
 >({
 	data,
 	tableCtx,
 	Layers = [BaseDataLayer as TTableLayer],
 }: {
 	data?: TData[];
-	tableCtx?: TTableCtx;
 	Layers?: TTableLayer[];
-}): TableComponents {
+} & (ContainsRequiredField<ExtractTableCtx<NoInfer<TTableLayer>>> extends true
+	? { tableCtx: TTableCtx }
+	: { tableCtx?: TTableCtx })): TableComponents {
 	const SubTableComponents = {
 		Body: TableBody,
 		Row: TableRow,
