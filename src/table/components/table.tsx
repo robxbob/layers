@@ -1,9 +1,10 @@
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithRef } from 'react';
+import { Layers } from '@/layers/components/layers';
 
-export type TableProps = {
-	children?: ReactNode;
-};
-
-export function Table({ children }: TableProps) {
-	return <table>{children}</table>;
+export function Table({ children, ...props }: ComponentPropsWithRef<'table'>) {
+	return (
+		<table {...props}>
+			<Layers>{children}</Layers>
+		</table>
+	);
 }

@@ -18,7 +18,7 @@ const meta = {
 		];
 		const Table = useTable({
 			data,
-			tableCtx: { columnOrder: [] },
+			tableCtx: { columnOrder: ['first', 'last'] },
 		});
 		return <Table />;
 	},

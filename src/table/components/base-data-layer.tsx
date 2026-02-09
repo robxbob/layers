@@ -8,16 +8,23 @@ export function BaseDataLayer<TData extends Data>({
 }: TableLayerProps<TData, { columnOrder: (keyof TData | (string & {}))[] }>) {
 	return (
 		<Table>
-			<Table.Body>
-				{data?.map((d, i) => (
-					<Table.Row key={`table-row-${d.id ?? i}`}>
-						{tableCtx.columnOrder.map((column) => (
-							<Table.Cell key={`table-cell-${String(column)}`}>
-								{d[column]}
-							</Table.Cell>
-						))}
-					</Table.Row>
-				))}
+			<Table.Body target="base">
+				{data?.map((d, i) => {
+					const target = d.id ?? i;
+					return (
+						<Table.Row key={`table-row-${target}`} target={target}>
+							{tableCtx.columnOrder.map((column) => (
+								<Table.Cell
+									key={`table-cell-${String(column)}`}
+									target={String(column)}
+								>
+									{d[column]}
+								</Table.Cell>
+							))}
+							<Table.Cell target="first">Override</Table.Cell>
+						</Table.Row>
+					);
+				})}
 			</Table.Body>
 		</Table>
 	);

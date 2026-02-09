@@ -1,9 +1,27 @@
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithRef } from 'react';
+import { Layers } from '@/layers/components/layers';
+import { useLayer } from '@/layers/hooks/useLayer';
+import type { LayerProps } from '@/layers/types/common';
 
-export type TableRowProps = {
-	children?: ReactNode;
-};
+export function TableRow({
+	target,
+	merge,
+	...props
+}: LayerProps<ComponentPropsWithRef<'tr'>>) {
+	const { active, Outer, Inner } = useLayer({
+		type: 'table-row',
+		target,
+		merge,
+		props,
+	});
 
-export function TableRow({ children }: TableRowProps) {
-	return <tr>{children}</tr>;
+	return active ? (
+		<Layers>
+			<Outer>
+				<tr>
+					<Inner>{props?.children}</Inner>
+				</tr>
+			</Outer>
+		</Layers>
+	) : null;
 }
