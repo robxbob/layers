@@ -1,3 +1,5 @@
+import type { ComponentProps } from 'react';
+import { Layers as LayerMap } from '@/layers/components/layers';
 import type { Any, Ctx, Data } from '@/utils/types/common';
 import { BaseDataLayer } from '../components/base-data-layer';
 import { Table } from '../components/table';
@@ -33,10 +35,10 @@ export function useTable<
 		Row: TableRow,
 		Cell: TableCell,
 	};
-	const LayeredTable = () => {
+	const LayeredTable = (p: ComponentProps<typeof Table>) => {
 		const TableComponents = Object.assign(Table, SubTableComponents);
 		return (
-			<>
+			<LayerMap>
 				{Layers?.map((Layer: Any, i) => {
 					return (
 						<Layer
@@ -48,7 +50,8 @@ export function useTable<
 						/>
 					);
 				})}
-			</>
+				<Table {...p} />
+			</LayerMap>
 		);
 	};
 

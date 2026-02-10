@@ -1,14 +1,19 @@
 import type { ComponentPropsWithRef } from 'react';
 import { Layers } from '@/layers/components/layers';
 import { useLayer } from '@/layers/hooks/useLayer';
-import type { LayerProps } from '@/layers/types/common';
+import type { LayerComponentProps } from '@/layers/types/common';
 
 export function TableCell({
 	target,
-	merge,
+	merge = {
+		children: (o, n) => {
+			console.log(o, n);
+			return n === undefined ? o : n;
+		},
+	},
 	...props
-}: LayerProps<ComponentPropsWithRef<'td'>>) {
-	const { active, Outer, Inner } = useLayer({
+}: LayerComponentProps<ComponentPropsWithRef<'td'>>) {
+	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table-cell',
 		target,
 		merge,
@@ -18,8 +23,8 @@ export function TableCell({
 	return active ? (
 		<Layers>
 			<Outer>
-				<td>
-					<Inner>{props?.children}</Inner>
+				<td {...mergedProps}>
+					<Inner>{mergedChildren}</Inner>
 				</td>
 			</Outer>
 		</Layers>

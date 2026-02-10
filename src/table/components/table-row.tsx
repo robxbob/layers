@@ -1,14 +1,14 @@
 import type { ComponentPropsWithRef } from 'react';
 import { Layers } from '@/layers/components/layers';
 import { useLayer } from '@/layers/hooks/useLayer';
-import type { LayerProps } from '@/layers/types/common';
+import type { LayerComponentProps } from '@/layers/types/common';
 
 export function TableRow({
 	target,
 	merge,
 	...props
-}: LayerProps<ComponentPropsWithRef<'tr'>>) {
-	const { active, Outer, Inner } = useLayer({
+}: LayerComponentProps<ComponentPropsWithRef<'tr'>>) {
+	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table-row',
 		target,
 		merge,
@@ -18,8 +18,8 @@ export function TableRow({
 	return active ? (
 		<Layers>
 			<Outer>
-				<tr>
-					<Inner>{props?.children}</Inner>
+				<tr {...mergedProps}>
+					<Inner>{mergedChildren}</Inner>
 				</tr>
 			</Outer>
 		</Layers>

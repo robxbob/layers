@@ -1,13 +1,16 @@
 import { Fragment, type ReactNode } from 'react';
+import { cn } from '@/utils/functions/cn';
 import type { Wrapper } from '@/utils/types/common';
 import type { LayerState, LayerStateProps, MergeFn } from '../types/common';
 
 const defaultMergeFn: MergeFn = (o, n) => (n === undefined ? o : n);
+const activeMergeFn: MergeFn = (o, n) => (o ?? true) && (n ?? true);
 const wrapperMergeFn: MergeFn<Wrapper[]> = (o, n) => [...o, ...n];
 const childrenMergeFn: MergeFn<ReactNode> = (o, n) => [
 	<Fragment key={`merged-child-${crypto.randomUUID()}`}>{o}</Fragment>,
 	<Fragment key={`merged-child-${crypto.randomUUID()}`}>{n}</Fragment>,
 ];
+const classNameMergeFn: MergeFn<string> = cn;
 
 export class LayerNode<TProps extends LayerStateProps = LayerStateProps> {
 	value: LayerState<TProps>;
@@ -26,9 +29,11 @@ export class LayerNode<TProps extends LayerStateProps = LayerStateProps> {
 		const mergedProps: LayerStateProps = {};
 		const mergeFns = Object.assign(
 			{
+				active: activeMergeFn,
 				outer: wrapperMergeFn,
 				inner: wrapperMergeFn,
 				children: childrenMergeFn,
+				className: classNameMergeFn,
 			},
 			layerNode.value.merge,
 		);
@@ -46,7 +51,20 @@ export class LayerNode<TProps extends LayerStateProps = LayerStateProps> {
 			mergedProps[key] = mergeFn(oldVal, newVal);
 		});
 		this.value.props = mergedProps as TProps;
-		this.value.merge = layerNode.value.merge;
+		this.value.merge = {
+			...this.value.merge,
+			...layerNode.value.merge,
+		} as LayerState<TProps>['merge'];
+	}
+
+	mergeAll() {
+		const mergedLayerNode = new LayerNode({ id: this.value.id });
+		let curr: LayerNode | null = this;
+		while (curr) {
+			mergedLayerNode.merge(curr);
+			curr = curr.next;
+		}
+		return mergedLayerNode;
 	}
 }
 
@@ -69,7 +87,7 @@ export class LayerList<TProps extends LayerStateProps = LayerStateProps> {
 
 	remove(id: string) {
 		const layerNode = this.#nodes.get(id);
-		if (!layerNode) return undefined;
+		if (!layerNode) return null;
 
 		if (layerNode === this.#head) this.#head = layerNode.next;
 		if (layerNode === this.#tail) this.#tail = layerNode.prev;
@@ -80,12 +98,12 @@ export class LayerList<TProps extends LayerStateProps = LayerStateProps> {
 		return layerNode;
 	}
 
-	peek() {
-		return this.#tail;
+	first() {
+		return this.#head;
 	}
 
 	mergeAll() {
-		if (this.#head === null) return undefined;
+		if (this.#head === null) return null;
 
 		const mergedLayerNode = new LayerNode({ id: this.#head.value.id });
 		let curr: LayerNode | null = this.#head;

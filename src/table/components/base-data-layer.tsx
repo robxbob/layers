@@ -3,25 +3,39 @@ import type { TableLayerProps } from '../types/common';
 
 export function BaseDataLayer<TData extends Data>({
 	Table,
-	tableCtx,
 	data,
-}: TableLayerProps<TData, { columnOrder: (keyof TData | (string & {}))[] }>) {
+	tableCtx: { columns, columnOrder = columns },
+}: TableLayerProps<
+	TData,
+	{
+		columns: (keyof TData | (string & {}))[];
+		columnOrder?: (keyof TData | (string & {}))[];
+	}
+>) {
 	return (
-		<Table>
+		<Table target="base">
 			<Table.Body target="base">
 				{data?.map((d, i) => {
-					const target = d.id ?? i;
+					const target = `${d.id ?? i}`;
 					return (
 						<Table.Row key={`table-row-${target}`} target={target}>
-							{tableCtx.columnOrder.map((column) => (
+							{columnOrder.map((column) => (
 								<Table.Cell
-									key={`table-cell-${String(column)}`}
+									key={`table-cell-order-${String(column)}`}
 									target={String(column)}
 								>
 									{d[column]}
 								</Table.Cell>
 							))}
-							<Table.Cell target="first">Override</Table.Cell>
+							{columns
+								.filter((column) => !columnOrder.includes(column))
+								.map((column) => (
+									<Table.Cell
+										key={`table-cell-column-${String(column)}`}
+										target={String(column)}
+										active={false}
+									/>
+								))}
 						</Table.Row>
 					);
 				})}

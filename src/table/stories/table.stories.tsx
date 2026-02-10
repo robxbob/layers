@@ -18,7 +18,7 @@ const meta = {
 		];
 		const Table = useTable({
 			data,
-			tableCtx: { columnOrder: ['first', 'last'] },
+			tableCtx: { columns: ['first', 'last'] },
 		});
 		return <Table />;
 	},
@@ -29,4 +29,30 @@ type Story = StoryObj<typeof meta>;
 
 export const Primary: Story = {
 	args: {},
+};
+
+export const OverrideDefaultCell: Story = {
+	render: () => {
+		const data = [
+			{ first: 'Robert', last: 'Hernandez', monkey: 'yes' },
+			{ first: 'Mimi', last: 'Hernandez', monkey: 'no' },
+		];
+		const columns = ['first', 'last', 'monkey'];
+		const columnOrder = ['first', 'monkey', 'last'];
+		const Table = useTable({
+			data,
+			tableCtx: { columns, columnOrder },
+		});
+		return (
+			<Table>
+				<Table.Body>
+					<Table.Row>
+						<Table.Cell target="monkey" className="text-blue-500">
+							perhaps
+						</Table.Cell>
+					</Table.Row>
+				</Table.Body>
+			</Table>
+		);
+	},
 };

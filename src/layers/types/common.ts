@@ -10,10 +10,13 @@ export type MergeFn<TPropType = Any> = (
 	newVal: TPropType,
 ) => TPropType;
 
-export type LayerStateProps = Record<string, Any> & {
+export type LayerProps = {
+	active?: boolean;
 	outer?: Wrapper[];
 	inner?: Wrapper[];
 };
+
+export type LayerStateProps = Record<string, Any> & LayerProps;
 
 export type LayerState<TProps extends LayerStateProps = LayerStateProps> = {
 	id: string;
@@ -23,12 +26,14 @@ export type LayerState<TProps extends LayerStateProps = LayerStateProps> = {
 	};
 };
 
-export type LayerProps<
+export type LayerComponentProps<
 	TProps extends Record<string, Any>,
-	TLayerProps = TProps & { outer?: Wrapper[]; inner?: Wrapper[] },
+	TLayerStateProps = TProps & LayerProps,
 > = {
 	target?: string;
 	merge?: {
-		[K in keyof NoInfer<TLayerProps>]?: MergeFn<NoInfer<TLayerProps>[K]>;
+		[K in keyof NoInfer<TLayerStateProps>]?: MergeFn<
+			NoInfer<TLayerStateProps>[K]
+		>;
 	};
-} & NoInfer<TLayerProps>;
+} & NoInfer<TLayerStateProps>;
