@@ -1,4 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useState } from 'react';
+import { withProfiler } from '@/../.storybook/decorators/profiler';
+import type { Any } from '@/utils/types/common';
 import { useTable } from '../hooks/use-table';
 
 const meta = {
@@ -32,27 +35,76 @@ export const Primary: Story = {
 };
 
 export const OverrideDefaultCell: Story = {
+	decorators: [withProfiler],
 	render: () => {
+		const [count, setCount] = useState(0);
 		const data = [
-			{ first: 'Robert', last: 'Hernandez', monkey: 'yes' },
+			// { first: 'Robert', last: 'Hernandez', monkey: 'yes' },
 			{ first: 'Mimi', last: 'Hernandez', monkey: 'no' },
 		];
-		const columns = ['first', 'last', 'monkey'];
-		const columnOrder = ['first', 'monkey', 'last'];
+		const columns = ['monkey'];
+		const columnOrder = ['monkey'];
 		const Table = useTable({
 			data,
 			tableCtx: { columns, columnOrder },
 		});
 		return (
-			<Table>
-				<Table.Body>
-					<Table.Row>
-						<Table.Cell target="monkey" className="text-blue-500">
-							perhaps
-						</Table.Cell>
-					</Table.Row>
-				</Table.Body>
-			</Table>
+			<>
+				<button
+					type="button"
+					onClick={() => {
+						setCount(count + 1);
+					}}
+				>
+					press
+				</button>
+				<Table>
+					<Table.Body>
+						<Table.Row>
+							<Table.Cell target="monkey" className="text-blue-500">
+								perhaps
+							</Table.Cell>
+						</Table.Row>
+					</Table.Body>
+				</Table>
+			</>
+		);
+	},
+};
+
+export const StandardTable: Story = {
+	decorators: [withProfiler],
+	render: () => {
+		const [count, setCount] = useState(0);
+		const data: Record<string, Any>[] = [
+			{ first: 'Robert', last: 'Hernandez', monkey: 'yes' },
+			{ first: 'Mimi', last: 'Hernandez', monkey: 'no' },
+		];
+		const columns = ['monkey'];
+		const columnOrder = ['monkey'];
+		return (
+			<>
+				<button
+					type="button"
+					onClick={() => {
+						setCount(count + 1);
+					}}
+				>
+					press
+				</button>
+				<table>
+					<tbody>
+						{data.map((d, i) => (
+							// biome-ignore lint/suspicious/noArrayIndexKey: dsa
+							<tr key={i}>
+								{columnOrder.map((column) => {
+									return <td key={column}>{d[column]}</td>;
+								})}
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</>
 		);
 	},
 };

@@ -1,4 +1,10 @@
-import type { ComponentProps } from 'react';
+import {
+	type ComponentProps,
+	useCallback,
+	useLayoutEffect,
+	useMemo,
+	useState,
+} from 'react';
 import { Layers as LayerMap } from '@/layers/components/layers';
 import type { Any, Ctx, Data } from '@/utils/types/common';
 import { BaseDataLayer } from '../components/base-data-layer';
@@ -30,30 +36,34 @@ export function useTable<
 } & (ContainsRequiredField<ExtractTableCtx<NoInfer<TTableLayer>>> extends true
 	? { tableCtx: TTableCtx }
 	: { tableCtx?: TTableCtx })): TableComponents {
-	const SubTableComponents = {
-		Body: TableBody,
-		Row: TableRow,
-		Cell: TableCell,
-	};
-	const LayeredTable = (p: ComponentProps<typeof Table>) => {
-		const TableComponents = Object.assign(Table, SubTableComponents);
-		return (
-			<LayerMap>
-				{Layers?.map((Layer: Any, i) => {
-					return (
-						<Layer
-							// biome-ignore lint/suspicious/noArrayIndexKey: Order will be maintained
-							key={`table-layer-${i}`}
-							Table={TableComponents}
-							data={data}
-							tableCtx={tableCtx}
-						/>
-					);
-				})}
-				<Table {...p} />
-			</LayerMap>
-		);
-	};
-
-	return Object.assign(LayeredTable, SubTableComponents);
+	const SubTableComponents = useMemo(
+		() => ({
+			Body: TableBody,
+			Row: TableRow,
+			Cell: TableCell,
+		}),
+		[],
+	);
+	return useMemo(() => {
+		const LayeredTable = (p: ComponentProps<typeof Table>) => {
+			const TableComponents = Object.assign(Table, SubTableComponents);
+			return (
+				<LayerMap>
+					{Layers?.map((Layer: Any, i) => {
+						return (
+							<Layer
+								// biome-ignore lint/suspicious/noArrayIndexKey: Order will be maintained
+								key={`table-layer-${i}`}
+								Table={TableComponents}
+								data={data}
+								tableCtx={tableCtx}
+							/>
+						);
+					})}
+					<Table key="extensions" {...p} />
+				</LayerMap>
+			);
+		};
+		return Object.assign(LayeredTable, SubTableComponents);
+	}, [Layers, tableCtx, SubTableComponents, data]);
 }

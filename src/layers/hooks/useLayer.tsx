@@ -17,9 +17,11 @@ export function useLayer<TProps extends LayerStateProps>({
 	const id = useId();
 	const store = use(LayersContext);
 	if (!store) throw new Error('useLayer must be used within Layers component.');
+
 	const isFirstLayer = useStore(store, (state) =>
 		state.isFirstLayer({ type, target, id }),
 	);
+
 	const [mergedLayers, setMergedLayers] = useState<LayerNode | null>(null);
 	const {
 		active,
@@ -29,6 +31,8 @@ export function useLayer<TProps extends LayerStateProps>({
 		...mergedProps
 	} = mergedLayers?.value.props ?? {};
 
+	if (type === 'table') console.log(id, target, active, isFirstLayer);
+
 	const addLayer = useStore(store, (state) => state.addLayer);
 	const removeLayer = useStore(store, (state) => state.removeLayer);
 	const mergeLayers = useStore(store, (state) => state.mergeLayers);
@@ -36,7 +40,7 @@ export function useLayer<TProps extends LayerStateProps>({
 	useLayoutEffect(() => {
 		addLayer({ type, target, id, props, merge });
 		return () => {
-			removeLayer({ type, target, id });
+			if (type === 'table-cell') removeLayer({ type, target, id });
 		};
 	}, [addLayer, removeLayer, type, target, id, props, merge]);
 

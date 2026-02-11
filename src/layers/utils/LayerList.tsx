@@ -72,6 +72,7 @@ export class LayerList<TProps extends LayerStateProps = LayerStateProps> {
 	#head: LayerNode | null = null;
 	#tail: LayerNode | null = null;
 	#nodes: Map<string, LayerNode> = new Map();
+	#length: number = 0;
 
 	add(p: LayerState<TProps>) {
 		const layerNode = new LayerNode(p);
@@ -83,6 +84,7 @@ export class LayerList<TProps extends LayerStateProps = LayerStateProps> {
 			this.#tail = layerNode;
 		}
 		this.#nodes.set(p.id, layerNode);
+		this.#length++;
 	}
 
 	remove(id: string) {
@@ -95,6 +97,7 @@ export class LayerList<TProps extends LayerStateProps = LayerStateProps> {
 		if (layerNode.next !== null) layerNode.next.prev = layerNode.prev;
 
 		this.#nodes.delete(id);
+		this.#length--;
 		return layerNode;
 	}
 
@@ -102,9 +105,12 @@ export class LayerList<TProps extends LayerStateProps = LayerStateProps> {
 		return this.#head;
 	}
 
+	length() {
+		return this.#length;
+	}
+
 	mergeAll() {
 		if (this.#head === null) return null;
-
 		const mergedLayerNode = new LayerNode({ id: this.#head.value.id });
 		let curr: LayerNode | null = this.#head;
 		while (curr) {

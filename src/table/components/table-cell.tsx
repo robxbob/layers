@@ -5,18 +5,17 @@ import type { LayerComponentProps } from '@/layers/types/common';
 
 export function TableCell({
 	target,
-	merge = {
-		children: (o, n) => {
-			console.log(o, n);
-			return n === undefined ? o : n;
-		},
-	},
+	merge,
 	...props
 }: LayerComponentProps<ComponentPropsWithRef<'td'>>) {
 	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table-cell',
 		target,
-		merge,
+		merge: merge ?? {
+			children: (o, n) => {
+				return n === undefined ? o : n;
+			},
+		},
 		props,
 	});
 
