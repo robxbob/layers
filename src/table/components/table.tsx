@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef } from 'react';
 import { Layers } from '@/layers/components/layers';
-import { useLayer } from '@/layers/hooks/useLayer';
+import { useLayer } from '@/layers/hooks/use-layer';
 import type { LayerComponentProps } from '@/layers/types/common';
 
 export function Table({

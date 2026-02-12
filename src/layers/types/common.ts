@@ -1,39 +1,33 @@
+import type { ReactNode } from 'react';
 import type { Any, Wrapper } from '@/utils/types/common';
-
-export type LayerTag = {
-	type: string;
-	target?: string;
-};
 
 export type MergeFn<TPropType = Any> = (
 	oldVal: TPropType,
 	newVal: TPropType,
 ) => TPropType;
 
-export type LayerProps = {
+export type LayerTag = {
+	type: string;
+	target?: string;
+	id: string;
+};
+
+export type BaseLayerProps = {
 	active?: boolean;
 	outer?: Wrapper[];
 	inner?: Wrapper[];
+	merge?: unknown;
 };
 
-export type LayerStateProps = Record<string, Any> & LayerProps;
-
-export type LayerState<TProps extends LayerStateProps = LayerStateProps> = {
-	id: string;
-	props?: TProps;
-	merge?: {
-		[K in keyof NoInfer<TProps>]?: MergeFn<NoInfer<TProps>[K]>;
+export type LayerProps<
+	TProps extends {
+		[K in keyof TProps]: K extends keyof BaseLayerProps ? never : TProps[K];
+	},
+> = TProps &
+	BaseLayerProps & {
+		merge?: {
+			[K in keyof (NoInfer<TProps> & Omit<BaseLayerProps, 'merge'>)]?: MergeFn<
+				(NoInfer<TProps> & BaseLayerProps)[K]
+			>;
+		};
 	};
-};
-
-export type LayerComponentProps<
-	TProps extends Record<string, Any>,
-	TLayerStateProps = TProps & LayerProps,
-> = {
-	target?: string;
-	merge?: {
-		[K in keyof NoInfer<TLayerStateProps>]?: MergeFn<
-			NoInfer<TLayerStateProps>[K]
-		>;
-	};
-} & NoInfer<TLayerStateProps>;

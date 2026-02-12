@@ -1,25 +1,29 @@
-import { createContext, type ReactNode, useState } from 'react';
+import { createContext, type ReactNode, useRef, useState } from 'react';
 import { createStore, type StoreApi } from 'zustand';
+import type { Any } from '@/utils/types/common';
 import type { LayerState, LayerTag } from '../types/common';
-import { LayerList, type LayerNode } from '../utils/LayerList';
+import { LayerList, type LayerNode } from '../utils/layer-list';
 
-type LayersStoreState = {
-	layers: Map<string, Map<string, LayerList>>;
+type LayersStoreState<
+	TProps extends Record<string, Any> = Record<string, Any>,
+> = {
+	layers: Map<LayerTag['type'], Map<LayerTag['target'], LayerList<TProps>>>;
 	addLayer: (p: LayerTag & LayerState) => void;
 	removeLayer: (p: { id: string } & LayerTag) => void;
 	mergeLayers: (p: LayerTag) => LayerNode | null;
 	isFirstLayer: (p: LayerTag & { id: string }) => boolean;
 };
 
-export const LayersContext = createContext<
-	StoreApi<LayersStoreState> | undefined
->(undefined);
+export const LayersContext = createContext<StoreApi<LayersStoreState> | null>(
+	null,
+);
 
 export function Layers({ children }: { children: ReactNode }) {
-	const [layersStore] = useState(
-		createStore<LayersStoreState>()((set, get) => ({
+	const layerStore = useRef<StoreApi<LayersStoreState> | null>(null);
+	if (layerStore.current === null) {
+		layerStore.current = createStore<LayersStoreState>()((set, get) => ({
 			layers: new Map(),
-			addLayer: ({ type, target = '', ...layerState }) =>
+			addLayer: ({ type, target, ...layerState }) =>
 				set((state) => {
 					const layerMap = state.layers.get(type) ?? new Map();
 					if (!state.layers.has(type)) state.layers.set(type, layerMap);
@@ -76,10 +80,10 @@ export function Layers({ children }: { children: ReactNode }) {
 			isFirstLayer: ({ type, target, id }) => {
 				if (!target) return false;
 				const firstLayer = get().layers.get(type)?.get(target)?.first() ?? null;
-				return firstLayer?.value?.id === id;
+				return firstLayer === null || firstLayer?.value?.id === id;
 			},
-		})),
-	);
+		}));
+	}
 
-	return <LayersContext value={layersStore}>{children}</LayersContext>;
+	return <LayersContext value={layerStore.current}>{children}</LayersContext>;
 }

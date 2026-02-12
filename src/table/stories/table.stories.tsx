@@ -1,5 +1,6 @@
+import { faker } from '@faker-js/faker';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { withProfiler } from '@/../.storybook/decorators/profiler';
 import type { Any } from '@/utils/types/common';
 import { useTable } from '../hooks/use-table';
@@ -38,12 +39,18 @@ export const OverrideDefaultCell: Story = {
 	decorators: [withProfiler],
 	render: () => {
 		const [count, setCount] = useState(0);
-		const data = [
-			// { first: 'Robert', last: 'Hernandez', monkey: 'yes' },
-			{ first: 'Mimi', last: 'Hernandez', monkey: 'no' },
-		];
-		const columns = ['monkey'];
-		const columnOrder = ['monkey'];
+		// biome-ignore lint/correctness/useExhaustiveDependencies: sds
+		const data = useMemo(
+			() =>
+				Array.from(Array(1), () => ({
+					firstName: faker.person.firstName(),
+					lastName: faker.person.lastName(),
+				})),
+			[count],
+		);
+
+		const columns = ['firstName'];
+		const columnOrder = ['firstName'];
 		const Table = useTable({
 			data,
 			tableCtx: { columns, columnOrder },
@@ -59,13 +66,13 @@ export const OverrideDefaultCell: Story = {
 					press
 				</button>
 				<Table>
-					<Table.Body>
+					{/* <Table.Body>
 						<Table.Row>
 							<Table.Cell target="monkey" className="text-blue-500">
 								perhaps
 							</Table.Cell>
 						</Table.Row>
-					</Table.Body>
+					</Table.Body> */}
 				</Table>
 			</>
 		);
@@ -76,12 +83,17 @@ export const StandardTable: Story = {
 	decorators: [withProfiler],
 	render: () => {
 		const [count, setCount] = useState(0);
-		const data: Record<string, Any>[] = [
-			{ first: 'Robert', last: 'Hernandez', monkey: 'yes' },
-			{ first: 'Mimi', last: 'Hernandez', monkey: 'no' },
-		];
-		const columns = ['monkey'];
-		const columnOrder = ['monkey'];
+		// biome-ignore lint/correctness/useExhaustiveDependencies: sds
+		const data = useMemo(
+			() =>
+				Array.from(Array(1), () => ({
+					firstName: faker.person.firstName(),
+					lastName: faker.person.lastName(),
+				})),
+			[count],
+		);
+
+		const columnOrder = ['firstName'];
 		return (
 			<>
 				<button

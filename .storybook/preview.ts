@@ -1,6 +1,9 @@
+import { faker } from '@faker-js/faker';
 import type { Preview } from '@storybook/react-vite';
 
 import '../src/styles/index.css';
+
+faker.seed(123);
 
 const preview: Preview = {
 	parameters: {

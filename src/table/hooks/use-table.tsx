@@ -67,3 +67,5 @@ export function useTable<
 		return Object.assign(LayeredTable, SubTableComponents);
 	}, [Layers, tableCtx, SubTableComponents, data]);
 }
+
+function LayeredTable() {}
