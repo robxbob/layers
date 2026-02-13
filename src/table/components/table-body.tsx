@@ -5,17 +5,15 @@ import type { LayerComponentProps } from '@/layers/types/common';
 
 export function TableBody({
 	target,
-	merge,
 	...props
 }: LayerComponentProps<ComponentPropsWithRef<'tbody'>>) {
-	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
+	const { shouldRender, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table-body',
 		target,
-		merge,
 		props,
 	});
 
-	return active ? (
+	return shouldRender ? (
 		<Layers>
 			<Outer>
 				<tbody {...mergedProps}>

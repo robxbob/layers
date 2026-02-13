@@ -5,17 +5,15 @@ import type { LayerComponentProps } from '@/layers/types/common';
 
 export function Table({
 	target,
-	merge,
 	...props
 }: LayerComponentProps<ComponentPropsWithRef<'table'>>) {
-	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
+	const { shouldRender, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table',
 		target,
-		merge,
 		props,
 	});
 
-	return active ? (
+	return shouldRender ? (
 		<Layers>
 			<Outer>
 				<table {...mergedProps}>

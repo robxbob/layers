@@ -7,7 +7,10 @@ import type { LayerProps, MergeFn } from '../types/common';
 const defaultMergeFn: MergeFn = (o, n) => (n === undefined ? o : n);
 const mergeMergeFn: MergeFn = (o, n) => ({ ...o, ...n });
 const activeMergeFn: MergeFn = (o, n) => (o ?? true) && (n ?? true);
-const wrapperMergeFn: MergeFn<Wrapper[]> = (o, n) => [...o, ...n];
+const wrapperMergeFn: MergeFn<Wrapper[]> = (o, n) => [
+	...(o ?? []),
+	...(n ?? []),
+];
 const childrenMergeFn: MergeFn<ReactNode> = (o, n) =>
 	o && n
 		? [
@@ -67,16 +70,24 @@ export class LayerNode<TProps extends Record<string, Any>> {
 			mergedProps[key] = mergeFn(oldVal, newVal);
 		});
 
-		return new LayerNode({ id: this.#id, props: mergedProps });
+		return new LayerNode({ id: this.#id, props: mergedProps as TProps });
 	}
 
 	mergeToEnd() {
-		let mergedLayerNode = new LayerNode({ id: this.#id, props: {} });
+		let mergedLayerNode = new LayerNode({ id: this.#id, props: {} as TProps });
 		let curr: LayerNode<TProps> | null = this;
 		while (curr) {
 			mergedLayerNode = mergedLayerNode.merge(curr);
 			curr = curr.next;
 		}
 		return mergedLayerNode;
+	}
+
+	get id() {
+		return this.#id;
+	}
+
+	get props() {
+		return this.#props;
 	}
 }

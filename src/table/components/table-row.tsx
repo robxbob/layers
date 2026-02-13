@@ -5,17 +5,15 @@ import type { LayerComponentProps } from '@/layers/types/common';
 
 export function TableRow({
 	target,
-	merge,
 	...props
 }: LayerComponentProps<ComponentPropsWithRef<'tr'>>) {
-	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
+	const { shouldRender, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table-row',
 		target,
-		merge,
 		props,
 	});
 
-	return active ? (
+	return shouldRender ? (
 		<Layers>
 			<Outer>
 				<tr {...mergedProps}>

@@ -1,17 +1,17 @@
-import { createContext, type ReactNode, useRef, useState } from 'react';
+import { createContext, type ReactNode, useRef } from 'react';
 import { createStore, type StoreApi } from 'zustand';
 import type { Any } from '@/utils/types/common';
-import type { LayerState, LayerTag } from '../types/common';
-import { LayerList, type LayerNode } from '../utils/layer-list';
+import type { LayerProps, LayerTag } from '../types/common';
+import { LayerList } from '../utils/layer-list';
+import type { LayerNode } from '../utils/layer-node';
 
-type LayersStoreState<
+export type LayersStoreState<
 	TProps extends Record<string, Any> = Record<string, Any>,
 > = {
-	layers: Map<LayerTag['type'], Map<LayerTag['target'], LayerList<TProps>>>;
-	addLayer: (p: LayerTag & LayerState) => void;
+	layerMap: Map<LayerTag['type'], Map<LayerTag['target'], LayerList<TProps>>>;
+	addLayer: (p: LayerTag & { props: LayerProps<TProps> }) => void;
 	removeLayer: (p: { id: string } & LayerTag) => void;
-	mergeLayers: (p: LayerTag) => LayerNode | null;
-	isFirstLayer: (p: LayerTag & { id: string }) => boolean;
+	getMergedLayer: (p: LayerTag) => LayerNode<TProps> | null;
 };
 
 export const LayersContext = createContext<StoreApi<LayersStoreState> | null>(
@@ -22,65 +22,54 @@ export function Layers({ children }: { children: ReactNode }) {
 	const layerStore = useRef<StoreApi<LayersStoreState> | null>(null);
 	if (layerStore.current === null) {
 		layerStore.current = createStore<LayersStoreState>()((set, get) => ({
-			layers: new Map(),
-			addLayer: ({ type, target, ...layerState }) =>
+			layerMap: new Map(),
+			addLayer: ({ type, target, id, props }) =>
 				set((state) => {
-					const layerMap = state.layers.get(type) ?? new Map();
-					if (!state.layers.has(type)) state.layers.set(type, layerMap);
+					// Maintains a working map of type based layerLists
+					const layers =
+						state.layerMap.get(type) ??
+						new Map<LayerTag['target'], LayerList<Record<string, Any>>>();
+					if (!state.layerMap.has(type)) state.layerMap.set(type, layers);
 
-					if (
-						target !== '' ||
-						layerMap.size === 0 ||
-						(layerMap.size === 1 && layerMap.has(''))
-					) {
-						const layerList = layerMap.get(target) ?? new LayerList();
-						if (!state.layers.has(target)) layerMap.set(target, layerList);
-						layerList.add(layerState);
-					} else {
-						layerMap.entries().forEach(([layerTarget, layerList]) => {
-							if (layerTarget !== '') {
-								layerList.add(layerState);
+					// If new layer is a default layer and there exists a non-default
+					// layer, the new layer will be added to all non-default layer
+					// list; otherwise, add the new layer to the correspondant
+					// layerlist.
+					if (!target && layers.keys().some((t) => t !== target)) {
+						layers.entries().forEach(([layerTarget, layerList]) => {
+							if (layerTarget !== target) {
+								layerList.add({ id, props });
 							}
 						});
-					}
+					} else {
+						// Maintains a working layerList
+						const layerList = layers.get(target) ?? new LayerList();
+						if (!layers.has(target)) layers.set(target, layerList);
 
+						layerList.add({ id, props });
+					}
 					return {};
 				}),
 			removeLayer: ({ type, target, id }) =>
 				set((state) => {
-					if (!target) {
-						const layerMap = state.layers.get(type);
-						layerMap?.entries()?.forEach(([layerTarget, layerList]) => {
-							layerList.remove(id);
-							if (!layerList.first()) layerMap.delete(layerTarget);
-						});
-					} else {
-						state.layers.get(type)?.get(target)?.remove(id);
-					}
+					type;
+					target;
+					id;
+					// if (!target) {
+					// 	const layerMap = state.layers.get(type);
+					// 	layerMap?.entries()?.forEach(([layerTarget, layerList]) => {
+					// 		layerList.remove(id);
+					// 		if (!layerList.first()) layerMap.delete(layerTarget);
+					// 	});
+					// } else {
+					// 	state.layers.get(type)?.get(target)?.remove(id);
+					// }
 					return {};
 				}),
-			mergeLayers: ({ type, target }) => {
-				if (target) {
-					const layerMap = get().layers.get(type);
-					if (!layerMap) return null;
-
-					const mergedDefaultLayer = layerMap.get('')?.mergeAll();
-					let mergedLayer = layerMap.get(target)?.first();
-
-					if (!mergedLayer) return null;
-
-					if (mergedDefaultLayer) {
-						mergedDefaultLayer.next = mergedLayer;
-						mergedLayer = mergedDefaultLayer;
-					}
-					return mergedLayer.mergeAll();
-				}
-				return null;
-			},
-			isFirstLayer: ({ type, target, id }) => {
-				if (!target) return false;
-				const firstLayer = get().layers.get(type)?.get(target)?.first() ?? null;
-				return firstLayer === null || firstLayer?.value?.id === id;
+			getMergedLayer: ({ type, target, id }: LayerTag) => {
+				const mergedLayer =
+					get().layerMap.get(type)?.get(target)?.getMergedLayer() ?? null;
+				return mergedLayer?.id !== id ? null : mergedLayer;
 			},
 		}));
 	}

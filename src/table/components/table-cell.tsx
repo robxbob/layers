@@ -8,18 +8,21 @@ export function TableCell({
 	merge,
 	...props
 }: LayerComponentProps<ComponentPropsWithRef<'td'>>) {
-	const { active, Outer, Inner, mergedProps, mergedChildren } = useLayer({
+	const { shouldRender, Outer, Inner, mergedProps, mergedChildren } = useLayer({
 		type: 'table-cell',
 		target,
-		merge: merge ?? {
-			children: (o, n) => {
-				return n === undefined ? o : n;
+		props: {
+			merge: {
+				children: (o, n) => {
+					return n === undefined ? o : n;
+				},
+				...merge,
 			},
+			...props,
 		},
-		props,
 	});
 
-	return active ? (
+	return shouldRender ? (
 		<Layers>
 			<Outer>
 				<td {...mergedProps}>

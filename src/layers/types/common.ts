@@ -31,3 +31,6 @@ export type LayerProps<
 			>;
 		};
 	};
+
+export type LayerComponentProps<TProps extends Record<string, Any>> =
+	LayerProps<TProps> & Pick<LayerTag, 'target'>;

@@ -43,9 +43,11 @@ export class LayerList<TProps extends Record<string, Any>> {
 		return layerNode;
 	}
 
-	mergeLayers() {
-		if (this.#mergedLayers || !this.#head) return this.#mergedLayers;
-		return this.#head.mergeToEnd();
+	getMergedLayer() {
+		if (!this.#mergedLayers && this.#head) {
+			this.#mergedLayers = this.#head.mergeToEnd();
+		}
+		return this.#mergedLayers;
 	}
 
 	get first() {
